@@ -18,6 +18,9 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 20, right: 10)
         layout.scrollDirection = .vertical
         layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 30)
+        
+//        layout.columnCount = 3
+        layout.stickyHeaders = true
         return layout
     }
     
@@ -53,9 +56,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        if let size = sizeMap[indexPath] {
-            return size
-        }
+        if let size = sizeMap[indexPath] { return size }
         let size = CGSize(width: 100, height: random(in: 50..<200))
         sizeMap[indexPath] = size
         return size
