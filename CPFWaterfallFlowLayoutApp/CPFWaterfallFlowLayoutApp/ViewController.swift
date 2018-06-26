@@ -35,6 +35,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         collectionView.delegate = self
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: String(describing: self))
         collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "header")
+        collectionView.contentInset = UIEdgeInsets(top: 1000, left: 0, bottom: 0, right: 0)
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {

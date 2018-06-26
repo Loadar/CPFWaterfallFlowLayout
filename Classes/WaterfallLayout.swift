@@ -261,7 +261,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         // 当前section最大可达的垂直偏移(header不能超出当前section)
         let sectionMaxY = lastCellAttributes.frame.maxY - attributes.frame.height + self.currentEdgeInsets.bottom
         // view顶部垂直偏移(header紧贴上边界)
-        let viewY = viewBounds.minY + collectionView!.contentInset.top
+        let viewY = viewBounds.minY 
         // 保存上下边界在view上，在section内
         let finalY = CGFloat.minimum(CGFloat.maximum(viewY, oldY), sectionMaxY)
         
