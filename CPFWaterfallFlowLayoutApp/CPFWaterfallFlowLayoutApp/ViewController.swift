@@ -17,10 +17,11 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         layout.minimumInteritemSpacing = 5
         layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 20, right: 10)
         layout.scrollDirection = .vertical
-        layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 30)
+        layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 130)
         
 //        layout.columnCount = 3
         layout.stickyHeaders = true
+        layout.stickyHeaderIgnoreHeight = -30
         return layout
     }
     
@@ -65,7 +66,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "header", for: indexPath)
-        header.backgroundColor = .green
+        header.backgroundColor = indexPath.section % 2 == 0 ? .green : .red
         (header as? CPFHeader)?.label.text = "\(indexPath.section)"
         return header
     }

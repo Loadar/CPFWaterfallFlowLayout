@@ -15,6 +15,8 @@
 public class WaterfallLayout: UICollectionViewFlowLayout {
     /// header粘附效果, 默认false
     public var stickyHeaders = false
+    // 粘附header可以忽略高度；忽略的部分在header粘附时可以超出view边界
+    public var stickyHeaderIgnoreHeight: CGFloat = 0
     /// 全局列数(未实现delegate方法时), 默认为2
     public var columnCount = 2
 
@@ -222,9 +224,15 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                     }
                     
                 } else {
-                    let lastItemAttributes = attributes.last!
-                    attributes.append(headerAttributes!)
-                    updateHeader(attributes: headerAttributes!, lastCellAttributes: lastItemAttributes)
+                    if let highestAttributes = aData.highestAttributes {
+                        attributes.append(headerAttributes!)
+                        updateHeader(attributes: headerAttributes!, lastCellAttributes: highestAttributes)
+                    } else {
+                        var finalRect = headerAttributes!.frame
+                        finalRect.origin = rect.origin
+                        headerAttributes?.frame = finalRect
+                        attributes.append(headerAttributes!)
+                    }
                 }
             }
         }
@@ -263,7 +271,20 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         // view顶部垂直偏移(header紧贴上边界)
         let viewY = viewBounds.minY 
         // 保存上下边界在view上，在section内
-        let finalY = CGFloat.minimum(CGFloat.maximum(viewY, oldY), sectionMaxY)
+        var finalY = CGFloat.minimum(CGFloat.maximum(viewY - stickyHeaderIgnoreHeight, oldY), sectionMaxY)
+        let section = attributes.indexPath.section
+        if section > 0 {
+            // 不能覆盖在前面的section上
+            let aData = sectionDatas[attributes.indexPath.section - 1]
+            if let previousHighestAttributes = aData.highestAttributes {
+                var insets = self.sectionInset
+                let delegate = collectionView?.delegate as? UICollectionViewDelegateFlowLayout
+                if let theInsets = delegate?.collectionView?(collectionView!, layout: self, insetForSectionAt: section) {
+                    insets = theInsets
+                }
+                finalY = max(finalY, previousHighestAttributes.frame.maxY + insets.bottom)
+            }
+        }
         
         origin.y = finalY
         

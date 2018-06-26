@@ -62,6 +62,22 @@ class SectionData {
             }
         }
         return column
-    }    
+    }
+    
+    /// 当前section高度最大的attributes
+    var highestAttributes: UICollectionViewLayoutAttributes? {
+        if columnMap.count == 0 { return nil }
+        if layoutAttributes.count == 0 { return nil }
+        let count = columnMap.count
+        if layoutAttributes.count < count { return nil }
+        let attributesCount = layoutAttributes.count
+        var attributes = layoutAttributes[attributesCount - count]
+        for i in ((attributesCount - count)..<attributesCount){
+            if layoutAttributes[i].frame.maxY > attributes.frame.maxY {
+                attributes = layoutAttributes[i]
+            }
+        }
+        return attributes
+    }
 }
 
