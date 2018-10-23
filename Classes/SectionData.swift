@@ -30,7 +30,7 @@ class SectionData {
     /// 获得当前section指定column的垂直方向最大偏移
     func bottom(forColumn column: Int) -> CGFloat {
         guard let rects = columnMap[column], rects.count > 0 else {
-            guard let headerAttributes = supplementMap[UICollectionElementKindSectionHeader] else { return 0}
+            guard let headerAttributes = supplementMap[UICollectionView.elementKindSectionHeader] else { return 0}
             return headerAttributes.frame.height
         }
         return rects.last!.maxY

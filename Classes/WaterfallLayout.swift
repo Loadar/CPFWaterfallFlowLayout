@@ -19,6 +19,10 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     public var stickyHeaderIgnoreHeight: CGFloat = 0
     /// 全局列数(未实现delegate方法时), 默认为2
     public var columnCount = 2
+    
+    // 高度限制，为0表示不限制
+    public var minHeight: CGFloat = 0
+    public var maxHeight: CGFloat = 0
 
     // section数据
     private var sectionDatas = [SectionData]()
@@ -89,10 +93,10 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         headerFrame.size = headerSize
         var headerHeight = CGFloat(0.0)
         
-        let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, with: indexPath)
+        let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, with: indexPath)
         headerAttributes.frame = headerFrame
         headerHeight = headerSize.height
-        aData.supplementMap[UICollectionElementKindSectionHeader] = headerAttributes
+        aData.supplementMap[UICollectionView.elementKindSectionHeader] = headerAttributes
         
         // sectionInsets
         var insets = self.sectionInset
@@ -146,7 +150,19 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             
             if let theSize = delegate?.collectionView!(collectionView!, layout: self, sizeForItemAt: itemPath) {
                 // 按宽高比例确定最终的item高度
-                itemRect.size.height = theSize.height * columnWidth / theSize.width
+                if theSize.width < 1e-6 {
+                    // 防止被除数过小
+                    itemRect.size.height = 1
+                } else {
+                    itemRect.size.height = theSize.height * columnWidth / theSize.width
+                }
+            }
+            
+            if minHeight > 0, itemRect.size.height < minHeight {
+                itemRect.size.height = minHeight
+            }
+            if maxHeight > 0, maxHeight > minHeight, itemRect.size.height > maxHeight {
+                itemRect.size.height = maxHeight
             }
             
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: itemPath)
@@ -164,10 +180,10 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             footerFrame.origin.y = itemsContentRect.size.height
             footerFrame.size = theSize
             
-            let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, with: indexPath)
+            let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, with: indexPath)
             footerAttributes.frame = footerFrame
             footerHeight = footerFrame.size.height
-            aData.supplementMap[UICollectionElementKindSectionFooter] = footerAttributes
+            aData.supplementMap[UICollectionView.elementKindSectionFooter] = footerAttributes
         }
         
         if section > 0 {
@@ -205,7 +221,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             
             var insets = UIEdgeInsets.zero
             // footer
-            let footerAttributes = aData.supplementMap[UICollectionElementKindSectionFooter]
+            let footerAttributes = aData.supplementMap[UICollectionView.elementKindSectionFooter]
             if footerAttributes != nil {
                 if rect.intersects(footerAttributes!.frame) {
                     attributes.append(footerAttributes!)
@@ -216,7 +232,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             self.currentEdgeInsets = insets
             
             // header
-            let headerAttributes = aData.supplementMap[UICollectionElementKindSectionHeader]
+            let headerAttributes = aData.supplementMap[UICollectionView.elementKindSectionHeader]
             if headerAttributes != nil {
                 if !stickyHeaders {
                     if rect.intersects(headerAttributes!.frame) {

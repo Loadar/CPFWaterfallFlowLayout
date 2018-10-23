@@ -22,6 +22,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
 //        layout.columnCount = 3
         layout.stickyHeaders = true
         layout.stickyHeaderIgnoreHeight = -30
+        layout.minHeight = 100
+        layout.maxHeight = 300
         return layout
     }
     
@@ -31,12 +33,12 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         super.viewDidLoad()
 
         collectionView.backgroundColor = .white
+        collectionView.frame = view.bounds
         view.addSubview(collectionView)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: String(describing: self))
-        collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "header")
-        collectionView.contentInset = UIEdgeInsets(top: 1000, left: 0, bottom: 0, right: 0)
+        collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header")
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -44,7 +46,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 50
+        return 100
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -59,13 +61,13 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if let size = sizeMap[indexPath] { return size }
-        let size = CGSize(width: 100, height: random(in: 50..<200))
+        let size = CGSize(width: 100, height: random(in: 5..<1200))
         sizeMap[indexPath] = size
         return size
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: "header", for: indexPath)
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header", for: indexPath)
         header.backgroundColor = indexPath.section % 2 == 0 ? .green : .red
         (header as? CPFHeader)?.label.text = "\(indexPath.section)"
         return header
