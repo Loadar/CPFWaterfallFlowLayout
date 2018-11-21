@@ -34,7 +34,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         guard let collectionView = self.collectionView else { return .zero }
         guard let lastSectionRect = sectionItemList.last?.frame else { return .zero }
         
-        var rect = collectionView.bounds.inset(by: collectionView.contentInset)
+        let rect = collectionView.bounds.inset(by: collectionView.contentInset)
         if self.scrollDirection == .horizontal {
             return CGSize(width: ceil(lastSectionRect.maxX), height: rect.height)
         }
