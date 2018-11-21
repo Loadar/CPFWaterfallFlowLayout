@@ -6,7 +6,7 @@ Swift瀑布流布局
 
 ```Swift
 // 支持Pods
-pod 'CPFWaterfallFlowLayout', '~>2.0.1'
+pod 'CPFWaterfallFlowLayout', '~>2.1.0'
 ```
 
 ```Swift
