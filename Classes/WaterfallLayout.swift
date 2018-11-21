@@ -23,8 +23,9 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     public var minWidth: CGFloat = 0
     public var maxWidth: CGFloat = UIScreen.main.bounds.width
     
-    public var relayout = true
-
+    // 最小Content height(水平滚动时为width), 为0表示不限制
+    public var minContentHeight: CGFloat = 0
+    
     // section数据
     private var sectionItemList = [CPFSectionItem]()
     
@@ -36,15 +37,38 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         
         let rect = collectionView.bounds.inset(by: collectionView.contentInset)
         if self.scrollDirection == .horizontal {
-            return CGSize(width: ceil(lastSectionRect.maxX), height: rect.height)
+            var width = ceil(lastSectionRect.maxX)
+            if minContentHeight > 0 {
+                width = max(width, minContentHeight)
+            }
+            return CGSize(width: width, height: rect.height)
         }
-        return CGSize(width: rect.width, height: ceil(lastSectionRect.maxY))
+        
+        var height = ceil(lastSectionRect.maxY)
+        if minContentHeight > 0 {
+            height = max(height, minContentHeight)
+        }
+        return CGSize(width: rect.width, height: height)
+    }
+    
+    public var actualContentSize: CGSize {
+        guard let collectionView = self.collectionView else { return .zero }
+        guard let lastSectionRect = sectionItemList.last?.frame else { return .zero }
+        
+        let rect = collectionView.bounds.inset(by: collectionView.contentInset)
+        if self.scrollDirection == .horizontal {
+            let width = ceil(lastSectionRect.maxX)
+            return CGSize(width: width, height: rect.height)
+        }
+        
+        let height = ceil(lastSectionRect.maxY)
+        return CGSize(width: rect.width, height: height)
     }
     
     // 准备更新layout
     override public func prepare() {
-        defer { relayout = true }
-        if !relayout, sectionItemList.count > 0 { return }
+        defer { super.prepare() }
+        
         sectionItemList.removeAll()
         
         guard let collectionView = self.collectionView else { return }
@@ -60,10 +84,11 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     // 返回指定indexPath的header or footer view 属性
     override public func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         guard (0..<sectionItemList.count).contains(indexPath.section) else { return nil }
+        let sectionItem = sectionItemList[indexPath.section]
         if elementKind == UICollectionView.elementKindSectionFooter {
-            return sectionItemList[indexPath.section].footerAttributes
+            return sectionItem.footerAttributes
         }
-        return sectionItemList[indexPath.section].headerAttributes
+        return sectionItem.headerAttributes
     }
 
     // 返回指定indexPath的item 属性
@@ -80,8 +105,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
 
     // collection view frame 变化时是否更新layout
     override public func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        relayout = false
-        return self.stickyHeaders
+        return false
     }
     
     // MARK: - Private Methods
@@ -265,6 +289,10 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         
         var attributes = [UICollectionViewLayoutAttributes]()
         let indexes = sectionIndexes(in: rect)
+        
+        let context = self.invalidationContext(forBoundsChange: rect)
+        (context as? UICollectionViewFlowLayoutInvalidationContext)?.invalidateFlowLayoutAttributes = true
+
         for section in indexes {
             guard (0..<sectionItemList.count).contains(section) else { continue }
             
@@ -293,10 +321,18 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                     }
                 } else {
                     // header粘附的判断
-                    attributes.append(headerAttributes)
                     updateHeader(attributes: headerAttributes, sectionItem: sectionItem)
+                    attributes.append(headerAttributes)
+                    
+                    // 设置header layout需要更新
+                    context.invalidateSupplementaryElements(ofKind: UICollectionView.elementKindSectionHeader, at: [headerAttributes.indexPath])
                 }
             }
+        }
+        
+        // 滑动时未触发整体更新，仅更新header
+        DispatchQueue.main.async {
+            self.invalidateLayout(with: context)
         }
         
         return attributes
