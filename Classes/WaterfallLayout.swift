@@ -6,249 +6,296 @@
 //  Copyright © 2018年 Aaron. All rights reserved.
 //
 
-#if os(iOS) || os(tvOS)
-    import UIKit
-#else
-    import AppKit
-#endif
+import UIKit
 
 public class WaterfallLayout: UICollectionViewFlowLayout {
     /// header粘附效果, 默认false
     public var stickyHeaders = false
     // 粘附header可以忽略高度；忽略的部分在header粘附时可以超出view边界
-    public var stickyHeaderIgnoreHeight: CGFloat = 0
-    /// 全局列数(未实现delegate方法时), 默认为2
+    public var stickyHeaderIgnoreOffset: CGFloat = 0
+    /// 全局列数(水平滚动时指行数)(未实现delegate方法时), 默认为2
     public var columnCount = 2
     
     // 高度限制，为0表示不限制
     public var minHeight: CGFloat = 0
-    public var maxHeight: CGFloat = 0
+    public var maxHeight: CGFloat = UIScreen.main.bounds.height
+    // 水平滚动时使用width
+    public var minWidth: CGFloat = 0
+    public var maxWidth: CGFloat = UIScreen.main.bounds.width
+    
+    public var relayout = true
 
     // section数据
-    private var sectionDatas = [SectionData]()
-    var currentEdgeInsets = UIEdgeInsets.zero
+    private var sectionItemList = [CPFSectionItem]()
     
     // MARK: - Overrides
     // 返回collectionView的contentSize
     override public var collectionViewContentSize: CGSize {
-        guard let lastSectionRect = sectionDatas.last?.rect else {
-            return CGSize.zero
+        guard let collectionView = self.collectionView else { return .zero }
+        guard let lastSectionRect = sectionItemList.last?.frame else { return .zero }
+        
+        var rect = collectionView.bounds.inset(by: collectionView.contentInset)
+        if self.scrollDirection == .horizontal {
+            return CGSize(width: ceil(lastSectionRect.maxX), height: rect.height)
         }
-        return CGSize(width: collectionView!.bounds.width, height: lastSectionRect.maxY)
+        return CGSize(width: rect.width, height: ceil(lastSectionRect.maxY))
     }
     
     // 准备更新layout
     override public func prepare() {
-        sectionDatas.removeAll()
+        defer { relayout = true }
+        if !relayout, sectionItemList.count > 0 { return }
+        sectionItemList.removeAll()
         
-        let sections = collectionView!.numberOfSections;
-        for aSection in 0 ..< sections {
-            let items = collectionView!.numberOfItems(inSection: aSection)
-            prepareLayout(inSection: aSection, numberOfItems: items)
+        guard let collectionView = self.collectionView else { return }
+        
+        // 确定section
+        let sectionCount = collectionView.numberOfSections
+        for aSection in 0..<sectionCount {
+            let itemCount = collectionView.numberOfItems(inSection: aSection)
+            prepareLayout(in: aSection, itemCount: itemCount)
         }
     }
     
     // 返回指定indexPath的header or footer view 属性
     override public func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        return sectionDatas[indexPath.section].supplementMap[elementKind]
+        guard (0..<sectionItemList.count).contains(indexPath.section) else { return nil }
+        if elementKind == UICollectionView.elementKindSectionFooter {
+            return sectionItemList[indexPath.section].footerAttributes
+        }
+        return sectionItemList[indexPath.section].headerAttributes
     }
-    
+
     // 返回指定indexPath的item 属性
     override public func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        return sectionDatas[indexPath.section].layoutAttributes[indexPath.item]
+        guard (0..<sectionItemList.count).contains(indexPath.section) else { return nil }
+        let sectionItem = sectionItemList[indexPath.section]
+        return sectionItem.layoutAttributesInfo[indexPath]
     }
-    
+
     // 指定区域内items属性
     override public func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         return visibleLayoutAttributes(in: rect)
     }
-    
+
     // collection view frame 变化时是否更新layout
     override public func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        relayout = false
         return self.stickyHeaders
     }
     
     // MARK: - Private Methods
     // 处理指定section的layout
-    internal func prepareLayout(inSection section: Int, numberOfItems items: Int) {
-        let aData = SectionData()
-        aData.section = section
-        sectionDatas.append(aData)
+    private func prepareLayout(in section: Int, itemCount: Int) {
+        guard let collectionView = self.collectionView else { return }
+        
+        let viewRect = collectionView.bounds.inset(by: collectionView.contentInset)
+        
+        let sectionItem = CPFSectionItem()
+        sectionItem.index = section
+        sectionItem.direction = scrollDirection
+        sectionItemList.append(sectionItem)
         
         let indexPath = IndexPath(item: 0, section: section)
-        let previousSectionRect = rect(forSection: section - 1)
+        let previousSectionRect = frame(of: section - 1)
         var sectionRect = CGRect.zero
-        sectionRect.origin.y = previousSectionRect.maxY
-        sectionRect.size.width = collectionView!.bounds.size.width
+        if self.scrollDirection == .horizontal {
+            sectionRect.origin.x = previousSectionRect.maxX
+            sectionRect.size.height = viewRect.height
+        } else {
+            sectionRect.origin.y = previousSectionRect.maxY
+            sectionRect.size.width = viewRect.width
+        }
         
         // header
         var headerSize = self.headerReferenceSize
-        let delegate = collectionView?.delegate as? UICollectionViewDelegateFlowLayout
-        if let theSize = delegate?.collectionView?(collectionView!, layout: self, referenceSizeForHeaderInSection: section) {
-            // delegate实现了header相关方法
-            headerSize = theSize
+        let delegate = collectionView.delegate as? WaterfallLayoutDelegate
+        if let finalHeaderSize = delegate?.collectionView?(collectionView, layout: self, referenceSizeForHeaderInSection: section) {
+            headerSize = finalHeaderSize
         }
-        var headerFrame = CGRect.zero
-        headerFrame.origin.y = sectionRect.origin.y
-        headerFrame.size = headerSize
-        var headerHeight = CGFloat(0.0)
-        
-        let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, with: indexPath)
-        headerAttributes.frame = headerFrame
-        headerHeight = headerSize.height
-        aData.supplementMap[UICollectionView.elementKindSectionHeader] = headerAttributes
+        if headerSize != .zero {
+            var headerFrame = CGRect.zero
+            if self.scrollDirection == .horizontal {
+                headerFrame.origin.x = sectionRect.origin.x
+            } else {
+                headerFrame.origin.y = sectionRect.origin.y
+            }
+            headerFrame.size = headerSize
+            
+            let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, with: indexPath)
+            headerAttributes.frame = headerFrame
+            sectionItem.headerAttributes = headerAttributes
+        }
         
         // sectionInsets
         var insets = self.sectionInset
-        if let theInsets = delegate?.collectionView?(collectionView!, layout: self, insetForSectionAt: section) {
-            insets = theInsets
+        if let finalInsets = delegate?.collectionView?(collectionView, layout: self, insetForSectionAt: section) {
+            insets = finalInsets
         }
-        aData.insets = insets
+        sectionItem.insets = insets
+        
+        // column count
+        var columnCount = self.columnCount
+        if let finalColumn = delegate?.collectionView?(collectionView, layout: self, columnForSection: section) {
+            columnCount = finalColumn
+        }
+        sectionItem.columnCount = columnCount
+        for aColumn in 0..<columnCount {
+            let item = CPFColumnItem()
+            item.index = aColumn
+            sectionItem.columnInfo[aColumn] = item
+        }
         
         // space
         var lineSpacing = self.minimumLineSpacing
-        if let space = delegate?.collectionView?(collectionView!, layout: self, minimumLineSpacingForSectionAt: section) {
+        if let space = delegate?.collectionView?(collectionView, layout: self, minimumLineSpacingForSectionAt: section) {
             lineSpacing = space
         }
         var interitemSpacing = self.minimumInteritemSpacing
-        if let space = delegate?.collectionView?(collectionView!, layout: self, minimumInteritemSpacingForSectionAt: section) {
+        if let space = delegate?.collectionView?(collectionView, layout: self, minimumInteritemSpacingForSectionAt: section) {
             interitemSpacing = space
         }
         
-        var itemsContentRect = CGRect.zero
-        itemsContentRect.origin.x = insets.left;
-        itemsContentRect.origin.y = headerHeight + insets.top;
-        
-        let theDelegate = delegate as? WaterfallLayoutDelegate
-        
-        var columns = columnCount
-        if let theColumn = theDelegate?.collectionView?(collectionView!, layout: self, columnForSection: section) {
-            columns = theColumn
+        // 确定宽度
+        var totalWidth = viewRect.width
+        // 去掉左右边距
+        totalWidth -= insets.left + insets.right
+        if scrollDirection == .horizontal {
+            totalWidth = viewRect.height
+            totalWidth -= insets.top + insets.bottom
         }
-        itemsContentRect.size.width = collectionView!.frame.width - insets.left - insets.right
-        let columnSpace = itemsContentRect.size.width - (interitemSpacing * (CGFloat(columns - 1)))
-        let columnWidth = columnSpace / CGFloat(columns)
-        for aColumn in 0 ..< columns {
-            aData.columnMap[aColumn] = [CGRect]()
+        // 去掉间距
+        if columnCount > 1 {
+            totalWidth -= interitemSpacing * CGFloat(columnCount - 1)
         }
+        let columnWidth = floor(totalWidth / CGFloat(columnCount))
         
         // item
-        for aItem in 0 ..< items {
+        for aItem in 0..<itemCount {
             let itemPath = IndexPath(item: aItem, section: section)
-            let destColumn = aData.preferredColumn
-            let destRow = aData.itemCount(inColumn: destColumn)
-            var lastItemBottom = aData.bottom(forColumn: destColumn)
-            if destRow == 0 {
-                lastItemBottom += sectionRect.origin.y
+            let currentColumn = sectionItem.preferredColumn
+            let currentRow = sectionItem.itemCount(in: currentColumn)
+            
+            var lastItemMaxY = sectionItem.maxY(of: currentColumn)
+            if currentRow == 0, sectionItem.headerAttributes == nil {
+                lastItemMaxY += scrollDirection == .horizontal ? sectionRect.maxX : sectionRect.maxY
             }
             
             var itemRect = CGRect.zero
-            itemRect.origin.x = itemsContentRect.origin.x + CGFloat(destColumn) * (interitemSpacing + columnWidth)
-            itemRect.origin.y = lastItemBottom + (destRow > 0 ? lineSpacing: insets.top)
             itemRect.size.width = columnWidth
             itemRect.size.height = columnWidth
+            if scrollDirection == .horizontal {
+                itemRect.origin.x = lastItemMaxY + (currentRow > 0 ? lineSpacing : 0)
+                itemRect.origin.y = insets.top + CGFloat(currentColumn) * (interitemSpacing + columnWidth)
+            } else {
+                itemRect.origin.x = insets.left + CGFloat(currentColumn) * (interitemSpacing + columnWidth)
+                itemRect.origin.y = lastItemMaxY + (currentRow > 0 ? lineSpacing : 0) // 非首行增加行间距
+            }
             
-            if let theSize = delegate?.collectionView!(collectionView!, layout: self, sizeForItemAt: itemPath) {
+            if let itemSize = delegate?.collectionView?(collectionView, layout: self, sizeForItemAt: itemPath), itemSize != .zero {
                 // 按宽高比例确定最终的item高度
-                if theSize.width < 1e-6 {
-                    // 防止被除数过小
-                    itemRect.size.height = 1
+                if scrollDirection == .horizontal {
+                    itemRect.size.width = columnWidth * itemSize.width / itemSize.height
                 } else {
-                    itemRect.size.height = theSize.height * columnWidth / theSize.width
+                    itemRect.size.height = columnWidth * itemSize.height / itemSize.width
+                }
+            }
+            // 高度限制
+            if scrollDirection == .horizontal {
+                if minWidth > 0, itemRect.size.width < minWidth {
+                    itemRect.size.width = minWidth
+                }
+                if maxWidth > 0, maxWidth > minWidth, itemRect.size.width > maxWidth {
+                    itemRect.size.width = maxWidth
+                }
+            } else {
+                if minHeight > 0, itemRect.size.height < minHeight {
+                    itemRect.size.height = minHeight
+                }
+                if maxHeight > 0, maxHeight > minHeight, itemRect.size.height > maxHeight {
+                    itemRect.size.height = maxHeight
                 }
             }
             
-            if minHeight > 0, itemRect.size.height < minHeight {
-                itemRect.size.height = minHeight
-            }
-            if maxHeight > 0, maxHeight > minHeight, itemRect.size.height > maxHeight {
-                itemRect.size.height = maxHeight
-            }
-            
+            print(itemRect)
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: itemPath)
             itemAttributes.frame = itemRect
-            aData.layoutAttributes.append(itemAttributes)
-            aData.columnMap[destColumn]?.append(itemRect)
+            sectionItem.columnInfo[currentColumn]?.layoutAttributes.append(itemAttributes)
         }
         
-        itemsContentRect.size.height = aData.height + insets.bottom
+        let itemMaxY = sectionItem.maxY
         
         // footer
-        var footerHeight = self.footerReferenceSize.height
-        if let theSize = delegate?.collectionView?(collectionView!, layout: self, referenceSizeForFooterInSection: section) {
+        var footerSize = self.footerReferenceSize
+        if let finalFooterSize = delegate?.collectionView?(collectionView, layout: self, referenceSizeForFooterInSection: section) {
+            footerSize = finalFooterSize
+        }
+        if footerSize != .zero {
             var footerFrame = CGRect.zero
-            footerFrame.origin.y = itemsContentRect.size.height
-            footerFrame.size = theSize
+            if scrollDirection == .horizontal {
+                footerFrame.origin.x = itemMaxY
+            } else {
+                footerFrame.origin.y = itemMaxY
+            }
+            footerFrame.size = footerSize
             
             let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, with: indexPath)
             footerAttributes.frame = footerFrame
-            footerHeight = footerFrame.size.height
-            aData.supplementMap[UICollectionView.elementKindSectionFooter] = footerAttributes
+            sectionItem.footerAttributes = footerAttributes
         }
         
-        if section > 0 {
-            itemsContentRect.size.height -= sectionRect.origin.y
+        if scrollDirection == .horizontal {
+            sectionRect.size.width = sectionItem.maxY - sectionRect.origin.x
+        } else {
+            sectionRect.size.height = sectionItem.maxY - sectionRect.origin.y
         }
-        
-        sectionRect.size.height = itemsContentRect.size.height + footerHeight
-        aData.rect = sectionRect
+        sectionItem.frame = sectionRect
     }
     
     // 获取指定section的区域
-    internal func rect(forSection section: Int) -> CGRect {
-        guard (0 ..< sectionDatas.count).contains(section) else {
-            return CGRect.zero
-        }
-        return sectionDatas[section].rect
+    private func frame(of section: Int) -> CGRect {
+        guard (0..<sectionItemList.count).contains(section) else { return CGRect.zero }
+        return sectionItemList[section].frame
     }
     
     // MARK: - Show Attributes Methods
     // 获取visible cell layout attributes
-    internal func visibleLayoutAttributes(in rect: CGRect) -> [UICollectionViewLayoutAttributes] {
+    private func visibleLayoutAttributes(in rect: CGRect) -> [UICollectionViewLayoutAttributes] {
+        guard let _ = self.collectionView else { return [] }
+        guard sectionItemList.count > 0 else { return [] }
+        
         var attributes = [UICollectionViewLayoutAttributes]()
         let indexes = sectionIndexes(in: rect)
-        for aSection in indexes {
+        for section in indexes {
+            guard (0..<sectionItemList.count).contains(section) else { continue }
             
-            let aData = sectionDatas[aSection]
-            
+            let sectionItem = sectionItemList[section]
+            let info = sectionItem.layoutAttributesInfo
             // items
-            for itemAttributes in aData.layoutAttributes {
+            for (_, itemAttributes) in info {
                 itemAttributes.zIndex = 1
                 if rect.intersects(itemAttributes.frame) {
                     attributes.append(itemAttributes)
                 }
             }
             
-            var insets = UIEdgeInsets.zero
             // footer
-            let footerAttributes = aData.supplementMap[UICollectionView.elementKindSectionFooter]
-            if footerAttributes != nil {
-                if rect.intersects(footerAttributes!.frame) {
-                    attributes.append(footerAttributes!)
+            if let footerAttributes = sectionItem.footerAttributes {
+                if rect.intersects(footerAttributes.frame) {
+                    attributes.append(footerAttributes)
                 }
-            } else {
-                insets = aData.insets
             }
-            self.currentEdgeInsets = insets
             
             // header
-            let headerAttributes = aData.supplementMap[UICollectionView.elementKindSectionHeader]
-            if headerAttributes != nil {
+            if let headerAttributes = sectionItem.headerAttributes {
                 if !stickyHeaders {
-                    if rect.intersects(headerAttributes!.frame) {
-                        attributes.append(headerAttributes!)
+                    if rect.intersects(headerAttributes.frame) {
+                        attributes.append(headerAttributes)
                     }
-                    
                 } else {
-                    if let highestAttributes = aData.highestAttributes {
-                        attributes.append(headerAttributes!)
-                        updateHeader(attributes: headerAttributes!, lastCellAttributes: highestAttributes)
-                    } else {
-                        var finalRect = headerAttributes!.frame
-                        finalRect.origin = rect.origin
-                        headerAttributes?.frame = finalRect
-                        attributes.append(headerAttributes!)
-                    }
+                    // header粘附的判断
+                    attributes.append(headerAttributes)
+                    updateHeader(attributes: headerAttributes, sectionItem: sectionItem)
                 }
             }
         }
@@ -257,11 +304,14 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     }
     
     // 获取visible cell indexPath list
-    internal func sectionIndexes(in rect: CGRect) -> [Int] {
+    private func sectionIndexes(in rect: CGRect) -> [Int] {
+        guard let collectionView = self.collectionView else { return [] }
+        
         var indexes = [Int]()
-        let sectionCount = collectionView!.numberOfSections
-        for section in 0 ..< sectionCount {
-            let sectionRect = sectionDatas[section].rect
+        let sectionCount = collectionView.numberOfSections
+        for section in 0..<sectionCount {
+            guard (0..<sectionItemList.count).contains(section) else { continue }
+            let sectionRect = sectionItemList[section].frame
             let isVisible = rect.intersects(sectionRect)
             if isVisible {
                 indexes.append(section)
@@ -270,42 +320,44 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         return indexes
     }
     
-    
     // MARK: - Sticky Header implementation methods
     // 更新Header
-    internal func updateHeader(attributes: UICollectionViewLayoutAttributes, lastCellAttributes: UICollectionViewLayoutAttributes) {
-        let viewBounds = collectionView!.bounds
+    private func updateHeader(attributes: UICollectionViewLayoutAttributes, sectionItem: CPFSectionItem) {
+        // header本身，不处理
+        guard let collectionView = self.collectionView else { return }
+        
+        let viewRect = collectionView.bounds
         // header显示在上层，给zIndex一个较大的值
         attributes.zIndex = 999
         attributes.isHidden = false
         
-        var origin = attributes.frame.origin
+        var finalFrame = attributes.frame
+        var previousMaxY: CGFloat = 0
+        if (0..<sectionItemList.count).contains(sectionItem.index - 1) {
+            let item = sectionItemList[sectionItem.index - 1]
+            previousMaxY = item.maxY
+        }
         // 旧的header垂直偏移
-        let oldY = origin.y
+        let oldY = previousMaxY
         // 当前section最大可达的垂直偏移(header不能超出当前section)
-        let sectionMaxY = lastCellAttributes.frame.maxY - attributes.frame.height + self.currentEdgeInsets.bottom
+        let sectionMaxY = sectionItem.maxY
         // view顶部垂直偏移(header紧贴上边界)
-        let viewY = viewBounds.minY 
-        // 保存上下边界在view上，在section内
-        var finalY = CGFloat.minimum(CGFloat.maximum(viewY - stickyHeaderIgnoreHeight, oldY), sectionMaxY)
+        let viewY = scrollDirection == .horizontal ? viewRect.minX : viewRect.minY
+        // 保持上下边界在view上，在section内
+        let height = scrollDirection == .horizontal ? finalFrame.width : finalFrame.height
+        var finalY = min(max(viewY - stickyHeaderIgnoreOffset, oldY), sectionMaxY - height)
         let section = attributes.indexPath.section
-        if section > 0 {
+        if section > 0, (0..<sectionItemList.count).contains(section - 1) {
             // 不能覆盖在前面的section上
-            let aData = sectionDatas[attributes.indexPath.section - 1]
-            if let previousHighestAttributes = aData.highestAttributes {
-                var insets = self.sectionInset
-                let delegate = collectionView?.delegate as? UICollectionViewDelegateFlowLayout
-                if let theInsets = delegate?.collectionView?(collectionView!, layout: self, insetForSectionAt: section) {
-                    insets = theInsets
-                }
-                finalY = max(finalY, previousHighestAttributes.frame.maxY + insets.bottom)
-            }
+            let previousSectionItem = sectionItemList[section - 1]
+            finalY = max(finalY, previousSectionItem.maxY)
         }
         
-        origin.y = finalY
-        
-        var finalRect = attributes.frame
-        finalRect.origin = origin
-        attributes.frame = finalRect
+        if scrollDirection == .horizontal {
+            finalFrame.origin.x = finalY
+        } else {
+            finalFrame.origin.y = finalY
+        }
+        attributes.frame = finalFrame
     }
 }

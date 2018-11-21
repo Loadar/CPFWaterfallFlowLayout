@@ -15,15 +15,21 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         let layout = WaterfallLayout()
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 5
-        layout.sectionInset = UIEdgeInsets(top: 20, left: 10, bottom: 20, right: 10)
+        layout.sectionInset = UIEdgeInsets(top: 30, left: 10, bottom: 50, right: 10)
         layout.scrollDirection = .vertical
         layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 130)
         
-//        layout.columnCount = 3
         layout.stickyHeaders = true
-        layout.stickyHeaderIgnoreHeight = -30
-        layout.minHeight = 100
-        layout.maxHeight = 300
+        layout.stickyHeaderIgnoreOffset = -80
+        layout.maxHeight = 500
+        
+//        layout.scrollDirection = .horizontal
+//        layout.headerReferenceSize = CGSize(width: 100, height: 200)
+//        layout.sectionInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 20)
+//
+//        layout.maxWidth = UIScreen.main.bounds.height
+//
+        layout.footerReferenceSize = CGSize(width: 1000, height: 100)
         return layout
     }
     
@@ -32,13 +38,28 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if #available(iOS 11.0, *) {
+            collectionView.contentInsetAdjustmentBehavior = .never
+        } else {
+            // Fallback on earlier versions
+        }
+        self.automaticallyAdjustsScrollViewInsets = false
+        
         collectionView.backgroundColor = .white
-        collectionView.frame = view.bounds
+        
+        let frame = view.bounds
+//        frame.size.height = 400
+//        frame.origin.y = 100
+        collectionView.frame = frame
+        collectionView.backgroundColor = UIColor.lightGray
         view.addSubview(collectionView)
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: String(describing: self))
         collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header")
+        collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "footer")
+
+        collectionView.contentInset = UIEdgeInsets(top: 20, left: 40, bottom: 30, right: 50)
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -61,15 +82,61 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if let size = sizeMap[indexPath] { return size }
-        let size = CGSize(width: 100, height: random(in: 5..<1200))
+        
+        let value = 100
+        let otherValue = random(in: 20..<1000)
+        var size = CGSize(width: value, height: otherValue)
+        if let layout = collectionViewLayout as? UICollectionViewFlowLayout, layout.scrollDirection == .horizontal {
+            size = CGSize(width: otherValue, height: value)
+        }
         sizeMap[indexPath] = size
         return size
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let layout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
+        let sectionInsets = layout.sectionInset
+        
+        if kind == UICollectionView.elementKindSectionFooter {
+            let footer = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "footer", for: indexPath)
+            footer.backgroundColor = indexPath.section % 2 == 0 ? UIColor.blue.withAlphaComponent(0.5) : UIColor.yellow.withAlphaComponent(0.5)
+            (footer as? CPFHeader)?.label.text = "\(indexPath.section)"
+            
+            let aView = footer.viewWithTag(333)
+            if aView == nil {
+                let extraView = UIView()
+                extraView.tag = 333
+                extraView.backgroundColor = UIColor.brown.withAlphaComponent(0.5)
+                footer.addSubview(extraView)
+                footer.clipsToBounds = false
+                if layout.scrollDirection == .horizontal {
+                    extraView.frame = CGRect(x: -sectionInsets.right, y: 0, width: sectionInsets.right, height: layout.footerReferenceSize.height)
+                } else {
+                    extraView.frame = CGRect(x: 0, y: -sectionInsets.bottom, width: layout.footerReferenceSize.width, height: sectionInsets.bottom)
+                }
+            }
+            return footer
+        }
+        
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header", for: indexPath)
-        header.backgroundColor = indexPath.section % 2 == 0 ? .green : .red
+        header.backgroundColor = indexPath.section % 2 == 0 ? UIColor.green.withAlphaComponent(0.5) : UIColor.red.withAlphaComponent(0.5)
         (header as? CPFHeader)?.label.text = "\(indexPath.section)"
+        
+        let aView = header.viewWithTag(444)
+        if aView == nil {
+            let extraView = UIView()
+            extraView.tag = 444
+            extraView.backgroundColor = UIColor.cyan.withAlphaComponent(0.5)
+            header.addSubview(extraView)
+            header.clipsToBounds = false
+            
+            if layout.scrollDirection == .horizontal {
+                extraView.frame = CGRect(x: layout.headerReferenceSize.width, y: 0, width: sectionInsets.left, height: layout.headerReferenceSize.height)
+            } else {
+                extraView.frame = CGRect(x: 0, y: layout.headerReferenceSize.height, width: layout.headerReferenceSize.width, height: sectionInsets.top)
+            }
+        }
+
         return header
     }
 
@@ -102,11 +169,4 @@ class CPFHeader: UICollectionReusableView {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-    
-    
 }
-
-
-
-
-

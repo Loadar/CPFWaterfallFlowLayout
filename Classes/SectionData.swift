@@ -6,56 +6,73 @@
 //  Copyright © 2018年 Aaron. All rights reserved.
 //
 
-#if os(iOS) || os(tvOS)
-    import UIKit
-#else
-    import AppKit
-#endif
+import UIKit
 
-/// 处理layout时的setion数据
-class SectionData {
-    var section = 0
-    var rect = CGRect.zero
-    var insets = UIEdgeInsets.zero
-    var columnMap = [Int: [CGRect]]()
-    var layoutAttributes = [UICollectionViewLayoutAttributes]()
-    var supplementMap = [String: UICollectionViewLayoutAttributes]()
+class CPFColumnItem {
+    var index: Int = 0
+    var layoutAttributes: [UICollectionViewLayoutAttributes] = []
+}
+
+class CPFSectionItem {
+    var index: Int = 0
+    var frame: CGRect = .zero
+    var insets: UIEdgeInsets = .zero
+    // 列表滚动方向
+    var direction: UICollectionView.ScrollDirection = .vertical
+    // 列(水平方向滚动时，为行)
+    var columnCount = 1
+    var columnInfo: [Int: CPFColumnItem] = [:]
+    // header & footer
+    var headerAttributes: UICollectionViewLayoutAttributes?
+    var footerAttributes: UICollectionViewLayoutAttributes?
     
-    /// 获得当前setion指定column的item数目
-    func itemCount(inColumn column: Int) -> Int {
-        guard columnMap[column] != nil else { return 0 }
-        return columnMap[column]!.count
+    /// 指定column的item数目(水平方向滚动时，为指定row的item数目)
+    func itemCount(in column: Int) -> Int {
+        return columnInfo[column]?.layoutAttributes.count ?? 0
     }
-    
-    /// 获得当前section指定column的垂直方向最大偏移
-    func bottom(forColumn column: Int) -> CGFloat {
-        guard let rects = columnMap[column], rects.count > 0 else {
-            guard let headerAttributes = supplementMap[UICollectionView.elementKindSectionHeader] else { return 0}
-            return headerAttributes.frame.height
+
+    /// 指定column垂直方向最大偏移(水平方向滚动时，为水平方向最大偏移)
+    func maxY(of column: Int) -> CGFloat {
+        // 检查列数据, 查找最后一个item
+        if let rect = columnInfo[column]?.layoutAttributes.last?.frame {
+            return direction == .horizontal ? rect.maxX : rect.maxY
         }
-        return rects.last!.maxY
-    }
-    
-    /// 当前section的高度
-    var height: CGFloat {
-        var maxHeight = CGFloat(0)
-        for (aColumn, _) in columnMap {
-            let height = bottom(forColumn: aColumn)
-            maxHeight = CGFloat.maximum(height, maxHeight)
+        // 检查header
+        if let attributes = headerAttributes {
+            return direction == .horizontal ? attributes.frame.maxX + insets.left : attributes.frame.maxY + insets.top
         }
-        return maxHeight
+        return direction == .horizontal ? insets.left : insets.top
     }
     
-    /// 当前section高度最小的列
+    /// 当前section的垂直方向的最大偏移(水平方向滚动时，为水平方向最大偏移)
+    var maxY: CGFloat {
+        // 检查footer
+        if let attributes = footerAttributes {
+            return direction == .horizontal ? attributes.frame.maxX : attributes.frame.maxY
+        }
+        // 检查列数据
+        var maxHeight: CGFloat = 0
+        for (aColumn, _) in columnInfo {
+            let height = maxY(of: aColumn)
+            maxHeight = max(height, maxHeight)
+        }
+        
+        let insetValue = direction == .horizontal ? insets.right : insets.bottom
+        return maxHeight + insetValue
+    }
+    
+    /// 当前section高度最小的列(水平方向滚动时，为行)
     var preferredColumn: Int {
         var column = 0
         var height = CGFloat.infinity
-        for (aColumn, _) in columnMap {
-            let theHeight = bottom(forColumn: aColumn)
-            if theHeight < height {
-                height = theHeight
+        
+        for (aColumn, _) in columnInfo {
+            let columnHeight = maxY(of: aColumn)
+            if columnHeight < height {
+                height = columnHeight
                 column = aColumn
-            } else if abs(theHeight - height) < 1e-6 {
+            } else if abs(columnHeight - height) < 1e-6 {
+                // 高度相同时，取较小的列
                 if aColumn < column {
                     column = aColumn
                 }
@@ -64,20 +81,40 @@ class SectionData {
         return column
     }
     
-    /// 当前section高度最大的attributes
-    var highestAttributes: UICollectionViewLayoutAttributes? {
-        if columnMap.count == 0 { return nil }
-        if layoutAttributes.count == 0 { return nil }
-        let count = columnMap.count
-        if layoutAttributes.count < count { return nil }
-        let attributesCount = layoutAttributes.count
-        var attributes = layoutAttributes[attributesCount - count]
-        for i in ((attributesCount - count)..<attributesCount){
-            if layoutAttributes[i].frame.maxY > attributes.frame.maxY {
-                attributes = layoutAttributes[i]
+    var layoutAttributesInfo: [IndexPath: UICollectionViewLayoutAttributes] {
+        var info = [IndexPath:UICollectionViewLayoutAttributes]()
+        for (_, columnItem) in columnInfo {
+            for anAttributes in columnItem.layoutAttributes {
+                info[anAttributes.indexPath] = anAttributes
             }
         }
-        return attributes
+        return info
+    }
+    
+    var layoutAttributesWithMaxY: UICollectionViewLayoutAttributes? {
+        // 检查footer
+        if let attributes = footerAttributes { return attributes }
+        
+        // 找各列最小的
+        var attributes: UICollectionViewLayoutAttributes?
+        for (_, columnItem) in columnInfo {
+            guard let lastAttributes = columnItem.layoutAttributes.last else { continue }
+            if let previousAttributes = attributes {
+                if direction == .horizontal {
+                    if previousAttributes.frame.maxX < lastAttributes.frame.maxX {
+                        attributes = lastAttributes
+                    }
+                } else {
+                    if previousAttributes.frame.maxY < lastAttributes.frame.maxY {
+                        attributes = lastAttributes
+                    }
+                }
+            } else {
+                attributes = lastAttributes
+            }
+        }
+        
+        // 无item时返回header
+        return attributes ?? headerAttributes
     }
 }
-
