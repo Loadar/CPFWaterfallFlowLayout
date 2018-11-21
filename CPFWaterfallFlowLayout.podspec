@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'CPFWaterfallFlowLayout'
-  s.version = '2.0.0'
+  s.version = '2.0.1'
   s.summary = 'Swift瀑布流布局'
   s.license = { :type => 'MIT', :file => 'LICENSE' }
   s.author = { 'chenpengfei' => 'afeiafeia@163.com' }

@@ -217,7 +217,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                 }
             }
             
-            print(itemRect)
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: itemPath)
             itemAttributes.frame = itemRect
             sectionItem.columnInfo[currentColumn]?.layoutAttributes.append(itemAttributes)
