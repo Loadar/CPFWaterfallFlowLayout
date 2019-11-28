@@ -312,14 +312,65 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             guard (0..<sectionItemList.count).contains(section) else { continue }
 
             let sectionItem = sectionItemList[section]
-            let info = sectionItem.layoutAttributesInfo
-            // items
-            for (_, itemAttributes) in info {
-                itemAttributes.zIndex = 1
-                if rect.intersects(itemAttributes.frame) {
-                    attributes.append(itemAttributes)
+            //let info = sectionItem.layoutAttributesInfo
+            
+            for (_, columnItem) in sectionItem.columnInfo {
+                guard !columnItem.layoutAttributes.isEmpty else { continue }
+                
+                var start = 0
+                var end = columnItem.layoutAttributes.endIndex
+                
+                var found: Int?
+                repeat {
+                    let middle = (start + end) / 2
+                    if rect.intersects(columnItem.layoutAttributes[middle].frame) {
+                        found = middle
+                        break
+                    }
+                    if scrollDirection == .horizontal {
+                        if rect.maxX < columnItem.layoutAttributes[middle].frame.minX {
+                            end = middle
+                        } else {
+                            start = middle
+                        }
+                    } else {
+                        if rect.maxY < columnItem.layoutAttributes[middle].frame.minY {
+                            end = middle
+                        } else {
+                            start = middle
+                        }
+                    }
+                    
+                } while start < end
+                
+                guard let theIndex = found else { continue }
+                
+                // 向前
+                for i in (0..<theIndex).reversed() {
+                    if rect.intersects(columnItem.layoutAttributes[i].frame) {
+                        attributes.append(columnItem.layoutAttributes[i])
+                    } else {
+                        break
+                    }
+                }
+                
+                // 向后
+                for i in theIndex..<columnItem.layoutAttributes.endIndex {
+                    if rect.intersects(columnItem.layoutAttributes[i].frame) {
+                        attributes.append(columnItem.layoutAttributes[i])
+                    } else {
+                        break
+                    }
                 }
             }
+            
+//            // items
+//            for (_, itemAttributes) in info {
+//                itemAttributes.zIndex = 1
+//                if rect.intersects(itemAttributes.frame) {
+//                    attributes.append(itemAttributes)
+//                }
+//            }
 
             // footer
             if let footerAttributes = sectionItem.footerAttributes {
