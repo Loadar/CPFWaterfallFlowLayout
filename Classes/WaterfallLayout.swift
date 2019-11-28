@@ -390,10 +390,10 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             }
         }
 
-        // 滑动时未触发整体更新，仅更新header
-        DispatchQueue.main.async {
-            self.invalidateLayout(with: context)
-        }
+//        // 滑动时未触发整体更新，仅更新header
+//        DispatchQueue.main.async {
+//            self.invalidateLayout(with: context)
+//        }
 
         return attributes
     }
