@@ -11,7 +11,7 @@ import UIKit
 class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, WaterfallLayoutDelegate{
 
     let collectionView = UICollectionView(frame: UIScreen.main.bounds, collectionViewLayout: layout)
-    class var layout: WaterfallLayout {
+    class var layout: UICollectionViewFlowLayout {
         let layout = WaterfallLayout()
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 5
@@ -19,7 +19,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         layout.scrollDirection = .vertical
         layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 130)
         
-        layout.stickyHeaders = true
+        layout.stickyHeaders = false
         layout.stickyHeaderIgnoreOffset = -80
         layout.maxHeight = 500
         
@@ -59,7 +59,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header")
         collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "footer")
 
-        collectionView.contentInset = UIEdgeInsets(top: 20, left: 40, bottom: 30, right: 50)
+        collectionView.contentInset = UIEdgeInsets(top: 20, left: 40, bottom: 2130, right: 50)
+        collectionView.alwaysBounceVertical = true
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -67,7 +68,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 100
+        return 2700 * 2
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

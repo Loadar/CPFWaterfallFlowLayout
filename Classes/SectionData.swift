@@ -81,14 +81,16 @@ class CPFSectionItem {
         return column
     }
     
-    var layoutAttributesInfo: [IndexPath: UICollectionViewLayoutAttributes] {
-        var info = [IndexPath:UICollectionViewLayoutAttributes]()
+    var layoutAttributesInfo: [IndexPath: UICollectionViewLayoutAttributes] = [:]
+    
+    func updateLayoutAttributesInfo() {
+        layoutAttributesInfo.removeAll()
+        
         for (_, columnItem) in columnInfo {
             for anAttributes in columnItem.layoutAttributes {
-                info[anAttributes.indexPath] = anAttributes
+                layoutAttributesInfo[anAttributes.indexPath] = anAttributes
             }
         }
-        return info
     }
     
     var layoutAttributesWithMaxY: UICollectionViewLayoutAttributes? {

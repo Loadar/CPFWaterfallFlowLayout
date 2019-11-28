@@ -28,6 +28,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     
     // section数据
     private var sectionItemList = [CPFSectionItem]()
+    private var allAttributes = [UICollectionViewLayoutAttributes]()
     
     // MARK: - Overrides
     // 返回collectionView的contentSize
@@ -65,11 +66,20 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         return CGSize(width: rect.width, height: height)
     }
     
+    public override func invalidateLayout() {
+        sectionItemList.removeAll()
+        allAttributes.removeAll()
+        super.invalidateLayout()
+    }
+    
     // 准备更新layout
     override public func prepare() {
         defer { super.prepare() }
         
+        guard sectionItemList.isEmpty else { return }
+        
         sectionItemList.removeAll()
+        allAttributes.removeAll()
         
         guard let collectionView = self.collectionView else { return }
         
@@ -83,7 +93,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     
     // 返回指定indexPath的header or footer view 属性
     override public func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        guard (0..<sectionItemList.count).contains(indexPath.section) else { return nil }
+        guard (0..<sectionItemList.endIndex).contains(indexPath.section) else { return nil }
         let sectionItem = sectionItemList[indexPath.section]
         if elementKind == UICollectionView.elementKindSectionFooter {
             return sectionItem.footerAttributes
@@ -93,7 +103,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
 
     // 返回指定indexPath的item 属性
     override public func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        guard (0..<sectionItemList.count).contains(indexPath.section) else { return nil }
+        guard (0..<sectionItemList.endIndex).contains(indexPath.section) else { return nil }
         let sectionItem = sectionItemList[indexPath.section]
         return sectionItem.layoutAttributesInfo[indexPath]
     }
@@ -149,6 +159,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, with: indexPath)
             headerAttributes.frame = headerFrame
             sectionItem.headerAttributes = headerAttributes
+            allAttributes.append(headerAttributes)
         }
         
         // sectionInsets
@@ -244,6 +255,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: itemPath)
             itemAttributes.frame = itemRect
             sectionItem.columnInfo[currentColumn]?.layoutAttributes.append(itemAttributes)
+            allAttributes.append(itemAttributes)
         }
         
         let itemMaxY = sectionItem.maxY
@@ -265,6 +277,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, with: indexPath)
             footerAttributes.frame = footerFrame
             sectionItem.footerAttributes = footerAttributes
+            allAttributes.append(footerAttributes)
         }
         
         if scrollDirection == .horizontal {
@@ -273,6 +286,8 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             sectionRect.size.height = sectionItem.maxY - sectionRect.origin.y
         }
         sectionItem.frame = sectionRect
+        
+        sectionItem.updateLayoutAttributesInfo()
     }
     
     // 获取指定section的区域
@@ -286,16 +301,16 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     private func visibleLayoutAttributes(in rect: CGRect) -> [UICollectionViewLayoutAttributes] {
         guard let _ = self.collectionView else { return [] }
         guard sectionItemList.count > 0 else { return [] }
-        
+
         var attributes = [UICollectionViewLayoutAttributes]()
         let indexes = sectionIndexes(in: rect)
-        
+
         let context = self.invalidationContext(forBoundsChange: rect)
-        (context as? UICollectionViewFlowLayoutInvalidationContext)?.invalidateFlowLayoutAttributes = true
+        (context as? UICollectionViewFlowLayoutInvalidationContext)?.invalidateFlowLayoutAttributes = false
 
         for section in indexes {
             guard (0..<sectionItemList.count).contains(section) else { continue }
-            
+
             let sectionItem = sectionItemList[section]
             let info = sectionItem.layoutAttributesInfo
             // items
@@ -305,14 +320,14 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                     attributes.append(itemAttributes)
                 }
             }
-            
+
             // footer
             if let footerAttributes = sectionItem.footerAttributes {
                 if rect.intersects(footerAttributes.frame) {
                     attributes.append(footerAttributes)
                 }
             }
-            
+
             // header
             if let headerAttributes = sectionItem.headerAttributes {
                 if !stickyHeaders {
@@ -323,25 +338,25 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                     // header粘附的判断
                     updateHeader(attributes: headerAttributes, sectionItem: sectionItem)
                     attributes.append(headerAttributes)
-                    
+
                     // 设置header layout需要更新
                     context.invalidateSupplementaryElements(ofKind: UICollectionView.elementKindSectionHeader, at: [headerAttributes.indexPath])
                 }
             }
         }
-        
+
         // 滑动时未触发整体更新，仅更新header
         DispatchQueue.main.async {
             self.invalidateLayout(with: context)
         }
-        
+
         return attributes
     }
     
     // 获取visible cell indexPath list
     private func sectionIndexes(in rect: CGRect) -> [Int] {
         guard let collectionView = self.collectionView else { return [] }
-        
+
         var indexes = [Int]()
         let sectionCount = collectionView.numberOfSections
         for section in 0..<sectionCount {
