@@ -28,7 +28,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     
     // section数据
     private var sectionItemList = [CPFSectionItem]()
-    private var allAttributes = [UICollectionViewLayoutAttributes]()
     
     // MARK: - Overrides
     // 返回collectionView的contentSize
@@ -68,7 +67,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     
     public override func invalidateLayout() {
         sectionItemList.removeAll()
-        allAttributes.removeAll()
         super.invalidateLayout()
     }
     
@@ -79,7 +77,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         guard sectionItemList.isEmpty else { return }
         
         sectionItemList.removeAll()
-        allAttributes.removeAll()
         
         guard let collectionView = self.collectionView else { return }
         
@@ -159,7 +156,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             let headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, with: indexPath)
             headerAttributes.frame = headerFrame
             sectionItem.headerAttributes = headerAttributes
-            allAttributes.append(headerAttributes)
         }
         
         // sectionInsets
@@ -255,7 +251,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: itemPath)
             itemAttributes.frame = itemRect
             sectionItem.columnInfo[currentColumn]?.layoutAttributes.append(itemAttributes)
-            allAttributes.append(itemAttributes)
         }
         
         let itemMaxY = sectionItem.maxY
@@ -277,7 +272,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             let footerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, with: indexPath)
             footerAttributes.frame = footerFrame
             sectionItem.footerAttributes = footerAttributes
-            allAttributes.append(footerAttributes)
         }
         
         if scrollDirection == .horizontal {

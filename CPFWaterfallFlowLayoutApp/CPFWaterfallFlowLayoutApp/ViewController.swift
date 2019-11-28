@@ -35,6 +35,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     
     var sizeMap: [IndexPath: CGSize] = [:]
     
+    var total = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -61,6 +63,19 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
 
         collectionView.contentInset = UIEdgeInsets(top: 20, left: 40, bottom: 2130, right: 50)
         collectionView.alwaysBounceVertical = true
+        
+        DispatchQueue.global().async {
+        
+            while (true) {
+                Thread.sleep(forTimeInterval: 1)
+                
+                DispatchQueue.main.async {
+                    self.total += 27
+                    
+                    self.collectionView.reloadData()
+                }
+            }
+        }
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -68,7 +83,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 100000
+        return total
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
