@@ -331,13 +331,13 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                         if rect.maxX < columnItem.layoutAttributes[middle].frame.minX {
                             end = middle
                         } else {
-                            start = middle
+                            start = middle + 1
                         }
                     } else {
                         if rect.maxY < columnItem.layoutAttributes[middle].frame.minY {
                             end = middle
                         } else {
-                            start = middle
+                            start = middle + 1
                         }
                     }
                     
