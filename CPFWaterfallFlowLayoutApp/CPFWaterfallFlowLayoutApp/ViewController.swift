@@ -23,6 +23,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         layout.stickyHeaderIgnoreOffset = -80
         layout.maxHeight = 500
         layout.appending = true
+        layout.pageSize = 27
         
 //        layout.scrollDirection = .horizontal
 //        layout.headerReferenceSize = CGSize(width: 100, height: 200)

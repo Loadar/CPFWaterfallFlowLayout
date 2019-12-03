@@ -27,6 +27,8 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     public var appending = false
     /// 强制布局，会忽略appending属性，仅作用一次
     public var forceLayout = false
+    /// 分页，指定此值以判断是否为附加，其他情况由调用方设置forceLayout解决
+    public var pageSize: Int?
     
     private var layoutRequired = true
     
@@ -75,13 +77,19 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     public override func invalidateLayout() {
         if forceLayout {
             forceLayout = false
-            
             sectionItemList.removeAll()
         } else if appending, let collectionView = self.collectionView, collectionView.numberOfSections == 1 {
             let itemCount = collectionView.numberOfItems(inSection: 0)
-            if let aItem = sectionItemList.first, aItem.layoutAttributesInfo.count >= itemCount {
-                // 需要重置
-                sectionItemList.removeAll()
+            if let aItem = sectionItemList.first {
+                if let pageSize = self.pageSize, itemCount <= pageSize {
+                    // 需要重置
+                    sectionItemList.removeAll()
+                } else if aItem.numberOfItems >= itemCount {
+                    // 需要重置
+                    sectionItemList.removeAll()
+                } else {
+                    // 保持当前数据
+                }
             } else {
                 // 保持当前数据
             }
