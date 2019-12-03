@@ -23,6 +23,13 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     public var minWidth: CGFloat = 0
     public var maxWidth: CGFloat = UIScreen.main.bounds.width
     
+    /// 是否为数据附加模式，为true时数据增加时，仅计算新增项的layout attributes
+    public var appending = false
+    /// 强制布局，会忽略appending属性，仅作用一次
+    public var forceLayout = false
+    
+    private var layoutRequired = true
+    
     // 最小Content height(水平滚动时为width), 为0表示不限制
     public var minContentHeight: CGFloat = 0
     
@@ -66,7 +73,22 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     }
     
     public override func invalidateLayout() {
-        sectionItemList.removeAll()
+        if forceLayout {
+            forceLayout = false
+            
+            sectionItemList.removeAll()
+        } else if appending, let collectionView = self.collectionView, collectionView.numberOfSections == 1 {
+            let itemCount = collectionView.numberOfItems(inSection: 0)
+            if let aItem = sectionItemList.first, aItem.layoutAttributesInfo.count >= itemCount {
+                // 需要重置
+                sectionItemList.removeAll()
+            } else {
+                // 保持当前数据
+            }
+        } else {
+            sectionItemList.removeAll()
+        }
+        layoutRequired = true
         super.invalidateLayout()
     }
     
@@ -74,9 +96,8 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     override public func prepare() {
         defer { super.prepare() }
         
-        guard sectionItemList.isEmpty else { return }
-        
-        sectionItemList.removeAll()
+        guard layoutRequired else { return }
+        layoutRequired = false
         
         guard let collectionView = self.collectionView else { return }
         
@@ -122,10 +143,23 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         
         let viewRect = collectionView.bounds.inset(by: collectionView.contentInset)
         
-        let sectionItem = CPFSectionItem()
-        sectionItem.index = section
-        sectionItem.direction = scrollDirection
-        sectionItemList.append(sectionItem)
+        let sectionItem: CPFSectionItem
+        if appending, sectionItemList.count > section {
+            sectionItem = sectionItemList[section]
+        } else {
+            sectionItem = CPFSectionItem()
+            sectionItem.index = section
+            sectionItem.direction = scrollDirection
+            sectionItemList.append(sectionItem)
+        }
+        sectionItem.headerAttributes = nil
+        sectionItem.footerAttributes = nil
+        
+        var numberOfItemToAdd = itemCount
+        if appending, sectionItem.numberOfItems > 0 {
+            numberOfItemToAdd = itemCount - sectionItem.numberOfItems
+        }
+        sectionItem.numberOfItems = itemCount
         
         let indexPath = IndexPath(item: 0, section: section)
         let previousSectionRect = frame(of: section - 1)
@@ -172,6 +206,8 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         }
         sectionItem.columnCount = columnCount
         for aColumn in 0..<columnCount {
+            if sectionItem.columnInfo[aColumn] != nil { continue }
+            
             let item = CPFColumnItem()
             item.index = aColumn
             sectionItem.columnInfo[aColumn] = item
@@ -202,7 +238,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         let columnWidth = floor(totalWidth / CGFloat(columnCount))
         
         // item
-        for aItem in 0..<itemCount {
+        for aItem in (itemCount - numberOfItemToAdd)..<itemCount {
             let itemPath = IndexPath(item: aItem, section: section)
             let currentColumn = sectionItem.preferredColumn
             let currentRow = sectionItem.itemCount(in: currentColumn)
@@ -251,6 +287,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: itemPath)
             itemAttributes.frame = itemRect
             sectionItem.columnInfo[currentColumn]?.layoutAttributes.append(itemAttributes)
+            sectionItem.layoutAttributesInfo[itemPath] = itemAttributes
         }
         
         let itemMaxY = sectionItem.maxY
@@ -280,8 +317,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             sectionRect.size.height = sectionItem.maxY - sectionRect.origin.y
         }
         sectionItem.frame = sectionRect
-        
-        sectionItem.updateLayoutAttributesInfo()
     }
     
     // 获取指定section的区域
@@ -357,14 +392,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                     }
                 }
             }
-            
-//            // items
-//            for (_, itemAttributes) in info {
-//                itemAttributes.zIndex = 1
-//                if rect.intersects(itemAttributes.frame) {
-//                    attributes.append(itemAttributes)
-//                }
-//            }
 
             // footer
             if let footerAttributes = sectionItem.footerAttributes {
@@ -389,11 +416,6 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                 }
             }
         }
-
-//        // 滑动时未触发整体更新，仅更新header
-//        DispatchQueue.main.async {
-//            self.invalidateLayout(with: context)
-//        }
 
         return attributes
     }

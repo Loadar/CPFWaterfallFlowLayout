@@ -26,6 +26,8 @@ class CPFSectionItem {
     var headerAttributes: UICollectionViewLayoutAttributes?
     var footerAttributes: UICollectionViewLayoutAttributes?
     
+    var numberOfItems = 0
+    
     /// 指定column的item数目(水平方向滚动时，为指定row的item数目)
     func itemCount(in column: Int) -> Int {
         return columnInfo[column]?.layoutAttributes.count ?? 0
@@ -82,16 +84,6 @@ class CPFSectionItem {
     }
     
     var layoutAttributesInfo: [IndexPath: UICollectionViewLayoutAttributes] = [:]
-    
-    func updateLayoutAttributesInfo() {
-        layoutAttributesInfo.removeAll()
-        
-        for (_, columnItem) in columnInfo {
-            for anAttributes in columnItem.layoutAttributes {
-                layoutAttributesInfo[anAttributes.indexPath] = anAttributes
-            }
-        }
-    }
     
     var layoutAttributesWithMaxY: UICollectionViewLayoutAttributes? {
         // 检查footer

@@ -22,6 +22,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         layout.stickyHeaders = false
         layout.stickyHeaderIgnoreOffset = -80
         layout.maxHeight = 500
+        layout.appending = true
         
 //        layout.scrollDirection = .horizontal
 //        layout.headerReferenceSize = CGSize(width: 100, height: 200)
@@ -61,17 +62,21 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header")
         collectionView.register(CPFHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionFooter, withReuseIdentifier: "footer")
 
-        collectionView.contentInset = UIEdgeInsets(top: 20, left: 40, bottom: 2130, right: 50)
+        collectionView.contentInset = UIEdgeInsets(top: 20, left: 40, bottom: 30, right: 50)
         collectionView.alwaysBounceVertical = true
         
         DispatchQueue.global().async {
         
+            var test = 1
             while (true) {
-                Thread.sleep(forTimeInterval: 1)
+                Thread.sleep(forTimeInterval: 5)
+
+                test += 1
+                if test > 5 { break }
                 
                 DispatchQueue.main.async {
                     self.total += 27
-                    
+
                     self.collectionView.reloadData()
                 }
             }
@@ -79,7 +84,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 5
+        return 1
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -100,7 +105,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         if let size = sizeMap[indexPath] { return size }
         
         let value = 100
-        let otherValue = random(in: 20..<1000)
+        let otherValue = random(in: 20..<120)
         var size = CGSize(width: value, height: otherValue)
         if let layout = collectionViewLayout as? UICollectionViewFlowLayout, layout.scrollDirection == .horizontal {
             size = CGSize(width: otherValue, height: value)
