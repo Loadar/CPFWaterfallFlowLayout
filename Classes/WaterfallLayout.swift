@@ -41,8 +41,8 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     // MARK: - Overrides
     // 返回collectionView的contentSize
     override public var collectionViewContentSize: CGSize {
-        guard let collectionView = self.collectionView else { return .zero }
-        guard let lastSectionRect = sectionItemList.last?.frame else { return .zero }
+        guard let collectionView = self.collectionView else { return CGSize(width: 0, height: minContentHeight) }
+        guard let lastSectionRect = sectionItemList.last?.frame else { return CGSize(width: 0, height: minContentHeight) }
         
         let rect = collectionView.bounds.inset(by: collectionView.contentInset)
         if self.scrollDirection == .horizontal {
