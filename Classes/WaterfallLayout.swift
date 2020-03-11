@@ -365,13 +365,13 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
                         break
                     }
                     if scrollDirection == .horizontal {
-                        if rect.maxX < columnItem.layoutAttributes[middle].frame.minX {
+                        if rect.maxX <= columnItem.layoutAttributes[middle].frame.minX + 0.5 {
                             end = middle
                         } else {
                             start = middle + 1
                         }
                     } else {
-                        if rect.maxY < columnItem.layoutAttributes[middle].frame.minY {
+                        if rect.maxY <= columnItem.layoutAttributes[middle].frame.minY + 0.5 {
                             end = middle
                         } else {
                             start = middle + 1
