@@ -17,7 +17,6 @@
 		938768E8205906B000D227EB /* CPFWaterfallFlowLayout.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 938768E7205906B000D227EB /* CPFWaterfallFlowLayout.podspec */; };
 		938768EC205906D000D227EB /* WaterfallLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938768E9205906CF00D227EB /* WaterfallLayout.swift */; };
 		938768ED205906D000D227EB /* SectionData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938768EA205906CF00D227EB /* SectionData.swift */; };
-		938768EE205906D000D227EB /* WaterfallLayoutDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938768EB205906D000D227EB /* WaterfallLayoutDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,7 +53,6 @@
 		938768E7205906B000D227EB /* CPFWaterfallFlowLayout.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; path = CPFWaterfallFlowLayout.podspec; sourceTree = "<group>"; };
 		938768E9205906CF00D227EB /* WaterfallLayout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaterfallLayout.swift; sourceTree = "<group>"; };
 		938768EA205906CF00D227EB /* SectionData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectionData.swift; sourceTree = "<group>"; };
-		938768EB205906D000D227EB /* WaterfallLayoutDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WaterfallLayoutDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,7 +138,6 @@
 			children = (
 				938768EA205906CF00D227EB /* SectionData.swift */,
 				938768E9205906CF00D227EB /* WaterfallLayout.swift */,
-				938768EB205906D000D227EB /* WaterfallLayoutDelegate.swift */,
 			);
 			name = Classes;
 			path = ../Classes;
@@ -218,23 +215,23 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0920;
-				LastUpgradeCheck = 1000;
+				LastUpgradeCheck = 1240;
 				ORGANIZATIONNAME = Aaron;
 				TargetAttributes = {
 					938768B3205905DE00D227EB = {
 						CreatedOnToolsVersion = 9.2;
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1240;
 						ProvisioningStyle = Automatic;
 					};
 					938768C7205905DE00D227EB = {
 						CreatedOnToolsVersion = 9.2;
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1240;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 938768B3205905DE00D227EB;
 					};
 					938768D2205905DE00D227EB = {
 						CreatedOnToolsVersion = 9.2;
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = 1240;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 938768B3205905DE00D227EB;
 					};
@@ -294,7 +291,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				938768BA205905DE00D227EB /* ViewController.swift in Sources */,
-				938768EE205906D000D227EB /* WaterfallLayoutDelegate.swift in Sources */,
 				938768EC205906D000D227EB /* WaterfallLayout.swift in Sources */,
 				938768B8205905DE00D227EB /* AppDelegate.swift in Sources */,
 				938768ED205906D000D227EB /* SectionData.swift in Sources */,
@@ -377,6 +373,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -436,6 +433,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -474,7 +472,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaron.oschina.CPFWaterfallFlowLayoutApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -490,7 +488,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaron.oschina.CPFWaterfallFlowLayoutApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -505,7 +503,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaron.oschina.CPFWaterfallFlowLayoutAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CPFWaterfallFlowLayoutApp.app/CPFWaterfallFlowLayoutApp";
 			};
@@ -521,7 +519,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaron.oschina.CPFWaterfallFlowLayoutAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CPFWaterfallFlowLayoutApp.app/CPFWaterfallFlowLayoutApp";
 			};
@@ -536,7 +534,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaron.oschina.CPFWaterfallFlowLayoutAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = CPFWaterfallFlowLayoutApp;
 			};
@@ -551,7 +549,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.aaron.oschina.CPFWaterfallFlowLayoutAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = CPFWaterfallFlowLayoutApp;
 			};

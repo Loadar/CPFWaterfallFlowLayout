@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, WaterfallLayoutDelegate{
+class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate {
 
     let collectionView = UICollectionView(frame: UIScreen.main.bounds, collectionViewLayout: layout)
     class var layout: UICollectionViewFlowLayout {
@@ -24,6 +24,10 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         layout.maxHeight = 500
         layout.appending = true
         layout.pageSize = 27
+        
+        layout.columnCountProviding = {
+            $0 + 2
+        }
         
 //        layout.scrollDirection = .horizontal
 //        layout.headerReferenceSize = CGSize(width: 100, height: 200)
@@ -85,7 +89,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
+        return 5
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -97,11 +101,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         cell.backgroundColor = .purple
         return cell
     }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, columnForSection section: Int) -> Int {
-        return section + 2
-    }
-    
+        
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if let size = sizeMap[indexPath] { return size }
         

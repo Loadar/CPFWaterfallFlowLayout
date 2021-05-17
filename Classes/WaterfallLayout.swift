@@ -15,6 +15,8 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
     public var stickyHeaderIgnoreOffset: CGFloat = 0
     /// 全局列数(水平滚动时指行数)(未实现delegate方法时), 默认为2
     public var columnCount = 2
+    /// 提供指定section的列数
+    public var columnCountProviding: ((Int) -> Int)?
     
     // 高度限制，为0表示不限制
     public var minHeight: CGFloat = 0
@@ -182,7 +184,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         
         // header
         var headerSize = self.headerReferenceSize
-        let delegate = collectionView.delegate as? WaterfallLayoutDelegate
+        let delegate = collectionView.delegate as? UICollectionViewDelegateFlowLayout
         if let finalHeaderSize = delegate?.collectionView?(collectionView, layout: self, referenceSizeForHeaderInSection: section) {
             headerSize = finalHeaderSize
         }
@@ -209,7 +211,7 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         
         // column count
         var columnCount = self.columnCount
-        if let finalColumn = delegate?.collectionView?(collectionView, layout: self, columnForSection: section) {
+        if let finalColumn = columnCountProviding?(section) {
             columnCount = finalColumn
         }
         sectionItem.columnCount = columnCount
