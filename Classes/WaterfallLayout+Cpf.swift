@@ -9,10 +9,18 @@
 import Foundation
 import CPFChain
 
-extension Cpf where Base: WaterfallLayout {
+public extension Cpf where Base: WaterfallLayout {
     @discardableResult
     func columnCount(_ closour: @escaping (Int) -> (Int)) -> Self {
         base.columnCountProviding = closour
+        return self
+    }
+}
+
+public extension Cpf where Base: UICollectionView {
+    @discardableResult
+    func columnCount(_ closour: @escaping (Int) -> (Int)) -> Self {
+        (base.collectionViewLayout as? WaterfallLayout)?.columnCountProviding = closour
         return self
     }
 }
