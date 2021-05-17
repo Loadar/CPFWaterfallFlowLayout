@@ -19,6 +19,7 @@ Pod::Spec.new do |s|
   s.subspec 'Cpf' do |subspec|
       subspec.source_files = 'Classes/WaterfallLayout+Cpf.swift'
       subspec.dependency 'CPFChain'
+      subspec.dependency 'CPFWaterfallFlowLayout/Base'
   end
 
 end
