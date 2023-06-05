@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'CPFWaterfallFlowLayout'
-  s.version = '2.4.2'
+  s.version = '2.5.0'
   s.summary = 'Swift瀑布流布局'
   s.license = { :type => 'MIT', :file => 'LICENSE' }
   s.author = { 'chenpengfei' => 'afeiafeia@163.com' }
@@ -12,12 +12,12 @@ Pod::Spec.new do |s|
   s.requires_arc = true
   
   s.subspec 'Base' do |subspec|
-      subspec.source_files = 'Classes/*.swift'
-      subspec.exclude_files = 'Classes/WaterfallLayout+Cpf.swift'
+      subspec.source_files = 'Sources/CPFWaterfallFlowLayout/*.swift'
+      subspec.exclude_files = 'Sources/CPFWaterfallFlowLayout/WaterfallLayout+Cpf.swift'
   end
   
   s.subspec 'Cpf' do |subspec|
-      subspec.source_files = 'Classes/WaterfallLayout+Cpf.swift'
+      subspec.source_files = 'Sources/CPFWaterfallFlowLayout/WaterfallLayout+Cpf.swift'
       subspec.dependency 'CPFChain'
       subspec.dependency 'CPFWaterfallFlowLayout/Base'
   end
