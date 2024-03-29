@@ -49,9 +49,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         if #available(iOS 11.0, *) {
             collectionView.contentInsetAdjustmentBehavior = .never
         } else {
-            // Fallback on earlier versions
+            self.automaticallyAdjustsScrollViewInsets = false
         }
-        self.automaticallyAdjustsScrollViewInsets = false
         
         collectionView.backgroundColor = .white
         
