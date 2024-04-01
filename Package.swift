@@ -9,19 +9,18 @@ let package = Package(
             name: "CPFWaterfallFlowLayout",
             targets: ["CPFWaterfallFlowLayout"]),
         .library(
-            name: "CPFWaterfallFlowLayout-Dynamic",
+            name: "CPFWaterfallFlowLayoutDynamic",
             type: .dynamic,
             targets: ["CPFWaterfallFlowLayout"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/Loadar/CPFChain.git", from: Version(stringLiteral: "2.2.5")),
+        .package(url: "https://github.com/Loadar/CPFChain.git", from: Version(stringLiteral: "2.2.6")),
     ],
     targets: [
         .target(
             name: "CPFWaterfallFlowLayout",
-            dependencies: ["CPFChain"],
-            path: "Sources",
-            resources: [.copy("PrivacyInfo.xcprivacy")]
+            dependencies: [.product(name: "CPFChainDynamic", package: "CPFChain")],
+            path: "Sources"
         ),
     ]
 )
