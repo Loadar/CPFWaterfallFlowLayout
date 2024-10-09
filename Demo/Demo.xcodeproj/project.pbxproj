@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		9370050E2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 9370050D2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic */; };
 		9370050F2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 9370050D2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		9370051D2CB67F6C009E4936 /* CPFChainDynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 9370051C2CB67F6C009E4936 /* CPFChainDynamic */; };
+		9370051E2CB67F73009E4936 /* CPFChainDynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 9370051C2CB67F6C009E4936 /* CPFChainDynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		93C96D522A2DC9A400295178 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C96D512A2DC9A400295178 /* AppDelegate.swift */; };
 		93C96D542A2DC9A400295178 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C96D532A2DC9A400295178 /* SceneDelegate.swift */; };
 		93C96D562A2DC9A400295178 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C96D552A2DC9A400295178 /* ViewController.swift */; };
@@ -25,6 +27,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				9370051E2CB67F73009E4936 /* CPFChainDynamic in Embed Frameworks */,
 				9370050F2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -50,6 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9370051D2CB67F6C009E4936 /* CPFChainDynamic in Frameworks */,
 				9370050E2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -132,6 +136,7 @@
 			name = Demo;
 			packageProductDependencies = (
 				9370050D2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic */,
+				9370051C2CB67F6C009E4936 /* CPFChainDynamic */,
 			);
 			productName = Demo;
 			productReference = 93C96D4E2A2DC9A400295178 /* Demo.app */;
@@ -161,6 +166,9 @@
 				Base,
 			);
 			mainGroup = 93C96D452A2DC9A400295178;
+			packageReferences = (
+				9370051B2CB67F6C009E4936 /* XCRemoteSwiftPackageReference "CPFChain" */,
+			);
 			productRefGroup = 93C96D4F2A2DC9A400295178 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -412,10 +420,26 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		9370051B2CB67F6C009E4936 /* XCRemoteSwiftPackageReference "CPFChain" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Loadar/CPFChain";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.7;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		9370050D2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CPFWaterfallFlowLayoutDynamic;
+		};
+		9370051C2CB67F6C009E4936 /* CPFChainDynamic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9370051B2CB67F6C009E4936 /* XCRemoteSwiftPackageReference "CPFChain" */;
+			productName = CPFChainDynamic;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
