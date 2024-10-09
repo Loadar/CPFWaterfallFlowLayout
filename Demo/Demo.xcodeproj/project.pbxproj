@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9370050E2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 9370050D2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic */; };
+		9370050F2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 9370050D2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		93C96D522A2DC9A400295178 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C96D512A2DC9A400295178 /* AppDelegate.swift */; };
 		93C96D542A2DC9A400295178 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C96D532A2DC9A400295178 /* SceneDelegate.swift */; };
 		93C96D562A2DC9A400295178 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C96D552A2DC9A400295178 /* ViewController.swift */; };
@@ -14,8 +16,6 @@
 		93C96D5B2A2DC9A500295178 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 93C96D5A2A2DC9A500295178 /* Assets.xcassets */; };
 		93C96D5E2A2DC9A600295178 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 93C96D5C2A2DC9A600295178 /* LaunchScreen.storyboard */; };
 		93C96D672A2DCA0A00295178 /* CPFWaterfallFlowLayout.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 93C96D662A2DCA0A00295178 /* CPFWaterfallFlowLayout.podspec */; };
-		93C96D6C2A2DCACF00295178 /* CPFWaterfallFlowLayout-Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 93C96D6B2A2DCACF00295178 /* CPFWaterfallFlowLayout-Dynamic */; };
-		93C96D6D2A2DCACF00295178 /* CPFWaterfallFlowLayout-Dynamic in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 93C96D6B2A2DCACF00295178 /* CPFWaterfallFlowLayout-Dynamic */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,7 +25,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				93C96D6D2A2DCACF00295178 /* CPFWaterfallFlowLayout-Dynamic in Embed Frameworks */,
+				9370050F2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -50,7 +50,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				93C96D6C2A2DCACF00295178 /* CPFWaterfallFlowLayout-Dynamic in Frameworks */,
+				9370050E2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,7 +131,7 @@
 			);
 			name = Demo;
 			packageProductDependencies = (
-				93C96D6B2A2DCACF00295178 /* CPFWaterfallFlowLayout-Dynamic */,
+				9370050D2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic */,
 			);
 			productName = Demo;
 			productReference = 93C96D4E2A2DC9A400295178 /* Demo.app */;
@@ -338,6 +338,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 628CHGGHXP;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Demo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -345,6 +346,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -365,6 +367,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 628CHGGHXP;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Demo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -372,6 +375,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -409,9 +413,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		93C96D6B2A2DCACF00295178 /* CPFWaterfallFlowLayout-Dynamic */ = {
+		9370050D2CB67AEC009E4936 /* CPFWaterfallFlowLayoutDynamic */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = "CPFWaterfallFlowLayout-Dynamic";
+			productName = CPFWaterfallFlowLayoutDynamic;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
