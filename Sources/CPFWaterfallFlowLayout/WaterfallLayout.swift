@@ -245,6 +245,8 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
         if columnCount > 1 {
             totalWidth -= interitemSpacing * CGFloat(columnCount - 1)
         }
+        
+        // 宽度取整数
         let columnWidth = floor(totalWidth / CGFloat(columnCount))
         
         // item
@@ -272,9 +274,11 @@ public class WaterfallLayout: UICollectionViewFlowLayout {
             if let itemSize = delegate?.collectionView?(collectionView, layout: self, sizeForItemAt: itemPath), itemSize != .zero {
                 // 按宽高比例确定最终的item高度
                 if scrollDirection == .horizontal {
-                    itemRect.size.width = columnWidth * itemSize.width / itemSize.height
+                    // 宽度取整
+                    itemRect.size.width = (columnWidth * itemSize.width / itemSize.height).rounded()
                 } else {
-                    itemRect.size.height = columnWidth * itemSize.height / itemSize.width
+                    // 高度取整
+                    itemRect.size.height = (columnWidth * itemSize.height / itemSize.width).rounded()
                 }
             }
             // 高度限制
